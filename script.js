@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('registrationForm');
     const messageElement = document.getElementById('message');
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', function (e) {
         e.preventDefault();
 
         const email = document.getElementById('email').value;
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // If all validations pass, simulate sending data to the server
+        // Call to Azure Function to register user
         registerUser(email, password);
     });
 
@@ -36,29 +36,28 @@ document.addEventListener('DOMContentLoaded', function() {
         messageElement.className = isSuccess ? 'success-message' : 'error-message';
     }
 
-    function registerUser(email, password) {
-        // Get existing users or initialize an empty array
-        let users = JSON.parse(localStorage.getItem('users')) || [];
+    async function registerUser(email, password) {
+        try {
+            const response = await fetch('https://ashy-pebble-0ec42eb10.5.azurestaticapps.net/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
 
-        // Check if user already exists
-        if (users.some(user => user.email === email)) {
-            showMessage('An account with this email already exists.', 'error');
-            return;
+            if (response.ok) {
+                showMessage('Registration successful! Redirecting to login...', true);
+                form.reset();
+                setTimeout(() => {
+                    window.location.href = 'login.html'; // Redirect to login page
+                }, 2000);
+            } else {
+                const error = await response.json();
+                showMessage(error.message || 'Registration failed. Try again.', false);
+            }
+        } catch (error) {
+            showMessage('An error occurred. Please try again later.', false);
         }
-
-        // Add new user
-        users.push({ email, password });
-
-        // Save to localStorage
-        localStorage.setItem('users', JSON.stringify(users));
-
-        showMessage('Registration successful! You can now log in.', 'success');
-        form.reset(); // Clear the form
-
-        // Redirect to login page after a short delay
-        setTimeout(() => {
-            window.location.href = 'login.html'; // Make sure you have a login.html page
-        }, 2000);
     }
-
 });
