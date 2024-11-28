@@ -17,6 +17,13 @@ const initialExpenses = [
     category: "Transport",
     date: "2024-11-02",
   },
+  {
+    id: "3",
+    title: "Pizza",
+    amount: 20.0,
+    category: "Food",
+    date: "2024-11-02",
+  },
 ];
 
 const Dashboard = () => {
